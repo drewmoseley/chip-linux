@@ -73,6 +73,7 @@
 #define SUNXI_MUSB_FL_PHY_ON			4
 #define SUNXI_MUSB_FL_HAS_SRAM			5
 #define SUNXI_MUSB_FL_HAS_RESET			6
+#define SUNXI_MUSB_FL_NO_CONFIGDATA		7
 
 /* Our read/write methods need access and do not get passed in a musb ref :| */
 static struct musb *sunxi_musb;
@@ -663,6 +664,11 @@ static int sunxi_musb_probe(struct platform_device *pdev)
 	if (of_device_is_compatible(np, "allwinner,sun6i-a31-musb"))
 		set_bit(SUNXI_MUSB_FL_HAS_RESET, &glue->flags);
 
+	if (of_device_is_compatible(np, "allwinner,sun8i-a33-musb")) {
+		set_bit(SUNXI_MUSB_FL_HAS_RESET, &glue->flags);
+		set_bit(SUNXI_MUSB_FL_NO_CONFIGDATA, &glue->flags);
+	}
+
 	glue->clk = devm_clk_get(&pdev->dev, NULL);
 	if (IS_ERR(glue->clk)) {
 		dev_err(&pdev->dev, "Error getting clock: %ld\n",
@@ -743,6 +749,7 @@ static int sunxi_musb_remove(struct platform_device *pdev)
 static const struct of_device_id sunxi_musb_match[] = {
 	{ .compatible = "allwinner,sun4i-a10-musb", },
 	{ .compatible = "allwinner,sun6i-a31-musb", },
+	{ .compatible = "allwinner,sun8i-a33-musb", },
 	{}
 };
 
