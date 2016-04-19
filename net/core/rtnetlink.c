@@ -881,7 +881,7 @@ static noinline size_t if_nlmsg_size(const struct net_device *dev,
 	       + nla_total_size(IFNAMSIZ) /* IFLA_QDISC */
 	       + nla_total_size(sizeof(struct rtnl_link_ifmap))
 	       + nla_total_size(sizeof(struct rtnl_link_stats))
-	       + nla_total_size(sizeof(struct rtnl_link_stats64))
+	       + nla_total_size_64bit(sizeof(struct rtnl_link_stats64))
 	       + nla_total_size(MAX_ADDR_LEN) /* IFLA_ADDRESS */
 	       + nla_total_size(MAX_ADDR_LEN) /* IFLA_BROADCAST */
 	       + nla_total_size(4) /* IFLA_TXQLEN */
@@ -1052,8 +1052,11 @@ static noinline_for_stack int rtnl_fill_stats(struct sk_buff *skb,
 	const struct rtnl_link_stats64 *stats;
 	struct rtnl_link_stats64 temp;
 	struct nlattr *attr;
+	int err;
 
-	stats = dev_get_stats(dev, &temp);
+	err = nla_align_64bit(skb, IFLA_PAD);
+	if (err)
+		return err;
 
 	attr = nla_reserve(skb, IFLA_STATS,
 			   sizeof(struct rtnl_link_stats));
