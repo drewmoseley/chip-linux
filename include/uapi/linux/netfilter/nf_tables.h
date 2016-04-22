@@ -180,6 +180,7 @@ enum nft_chain_attributes {
 	NFTA_CHAIN_USE,
 	NFTA_CHAIN_TYPE,
 	NFTA_CHAIN_COUNTERS,
+	NFTA_CHAIN_PAD,
 	__NFTA_CHAIN_MAX
 };
 #define NFTA_CHAIN_MAX		(__NFTA_CHAIN_MAX - 1)
@@ -204,6 +205,7 @@ enum nft_rule_attributes {
 	NFTA_RULE_COMPAT,
 	NFTA_RULE_POSITION,
 	NFTA_RULE_USERDATA,
+	NFTA_RULE_PAD,
 	__NFTA_RULE_MAX
 };
 #define NFTA_RULE_MAX		(__NFTA_RULE_MAX - 1)
@@ -304,6 +306,8 @@ enum nft_set_attributes {
 	NFTA_SET_ID,
 	NFTA_SET_TIMEOUT,
 	NFTA_SET_GC_INTERVAL,
+	NFTA_SET_USERDATA,
+	NFTA_SET_PAD,
 	__NFTA_SET_MAX
 };
 #define NFTA_SET_MAX		(__NFTA_SET_MAX - 1)
@@ -337,6 +341,7 @@ enum nft_set_elem_attributes {
 	NFTA_SET_ELEM_EXPIRATION,
 	NFTA_SET_ELEM_USERDATA,
 	NFTA_SET_ELEM_EXPR,
+	NFTA_SET_ELEM_PAD,
 	__NFTA_SET_ELEM_MAX
 };
 #define NFTA_SET_ELEM_MAX	(__NFTA_SET_ELEM_MAX - 1)
@@ -580,6 +585,7 @@ enum nft_dynset_attributes {
 	NFTA_DYNSET_SREG_DATA,
 	NFTA_DYNSET_TIMEOUT,
 	NFTA_DYNSET_EXPR,
+	NFTA_DYNSET_PAD,
 	__NFTA_DYNSET_MAX,
 };
 #define NFTA_DYNSET_MAX		(__NFTA_DYNSET_MAX - 1)
@@ -775,6 +781,8 @@ enum nft_limit_attributes {
 	NFTA_LIMIT_UNIT,
 	NFTA_LIMIT_BURST,
 	NFTA_LIMIT_TYPE,
+	NFTA_LIMIT_FLAGS,
+	NFTA_LIMIT_PAD,
 	__NFTA_LIMIT_MAX
 };
 #define NFTA_LIMIT_MAX		(__NFTA_LIMIT_MAX - 1)
@@ -789,6 +797,7 @@ enum nft_counter_attributes {
 	NFTA_COUNTER_UNSPEC,
 	NFTA_COUNTER_BYTES,
 	NFTA_COUNTER_PACKETS,
+	NFTA_COUNTER_PAD,
 	__NFTA_COUNTER_MAX
 };
 #define NFTA_COUNTER_MAX	(__NFTA_COUNTER_MAX - 1)
@@ -970,4 +979,55 @@ enum nft_gen_attributes {
 };
 #define NFTA_GEN_MAX		(__NFTA_GEN_MAX - 1)
 
+/**
+ * enum nft_trace_attributes - nf_tables trace netlink attributes
+ *
+ * @NFTA_TRACE_TABLE: name of the table (NLA_STRING)
+ * @NFTA_TRACE_CHAIN: name of the chain (NLA_STRING)
+ * @NFTA_TRACE_RULE_HANDLE: numeric handle of the rule (NLA_U64)
+ * @NFTA_TRACE_TYPE: type of the event (NLA_U32: nft_trace_types)
+ * @NFTA_TRACE_VERDICT: verdict returned by hook (NLA_NESTED: nft_verdicts)
+ * @NFTA_TRACE_ID: pseudo-id, same for each skb traced (NLA_U32)
+ * @NFTA_TRACE_LL_HEADER: linklayer header (NLA_BINARY)
+ * @NFTA_TRACE_NETWORK_HEADER: network header (NLA_BINARY)
+ * @NFTA_TRACE_TRANSPORT_HEADER: transport header (NLA_BINARY)
+ * @NFTA_TRACE_IIF: indev ifindex (NLA_U32)
+ * @NFTA_TRACE_IIFTYPE: netdev->type of indev (NLA_U16)
+ * @NFTA_TRACE_OIF: outdev ifindex (NLA_U32)
+ * @NFTA_TRACE_OIFTYPE: netdev->type of outdev (NLA_U16)
+ * @NFTA_TRACE_MARK: nfmark (NLA_U32)
+ * @NFTA_TRACE_NFPROTO: nf protocol processed (NLA_U32)
+ * @NFTA_TRACE_POLICY: policy that decided fate of packet (NLA_U32)
+ */
+enum nft_trace_attibutes {
+	NFTA_TRACE_UNSPEC,
+	NFTA_TRACE_TABLE,
+	NFTA_TRACE_CHAIN,
+	NFTA_TRACE_RULE_HANDLE,
+	NFTA_TRACE_TYPE,
+	NFTA_TRACE_VERDICT,
+	NFTA_TRACE_ID,
+	NFTA_TRACE_LL_HEADER,
+	NFTA_TRACE_NETWORK_HEADER,
+	NFTA_TRACE_TRANSPORT_HEADER,
+	NFTA_TRACE_IIF,
+	NFTA_TRACE_IIFTYPE,
+	NFTA_TRACE_OIF,
+	NFTA_TRACE_OIFTYPE,
+	NFTA_TRACE_MARK,
+	NFTA_TRACE_NFPROTO,
+	NFTA_TRACE_POLICY,
+	NFTA_TRACE_PAD,
+	__NFTA_TRACE_MAX
+};
+#define NFTA_TRACE_MAX (__NFTA_TRACE_MAX - 1)
+
+enum nft_trace_types {
+	NFT_TRACETYPE_UNSPEC,
+	NFT_TRACETYPE_POLICY,
+	NFT_TRACETYPE_RETURN,
+	NFT_TRACETYPE_RULE,
+	__NFT_TRACETYPE_MAX
+};
+#define NFT_TRACETYPE_MAX (__NFT_TRACETYPE_MAX - 1)
 #endif /* _LINUX_NF_TABLES_H */
