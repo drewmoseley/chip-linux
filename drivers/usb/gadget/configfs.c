@@ -1410,6 +1410,7 @@ static const struct usb_gadget_driver configfs_driver_template = {
 		.owner          = THIS_MODULE,
 		.name		= "configfs-gadget",
 	},
+	.match_existing_only = 1,
 };
 
 static struct config_group *gadgets_make(
