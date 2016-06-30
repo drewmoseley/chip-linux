@@ -26,9 +26,7 @@
  * We directly use the kernel VA for the HYP, as we can directly share
  * the mapping (HTTBR "covers" TTBR1).
  */
-#define HYP_PAGE_OFFSET_MASK	UL(~0)
-#define HYP_PAGE_OFFSET		PAGE_OFFSET
-#define KERN_TO_HYP(kva)	(kva)
+#define kern_hyp_va(kva)	(kva)
 
 /*
  * Our virtual mapping for the boot-time MMU-enable code. Must be
