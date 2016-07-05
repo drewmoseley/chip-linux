@@ -443,26 +443,27 @@ static void CfgScanResult(enum scan_event enuScanEvent, tstrNetworkInfo *pstrNet
 
 			down(&(priv->hSemScanReq));
 
-			if (priv->pstrScanReq != NULL) {
-				cfg80211_scan_done(priv->pstrScanReq, false);
+			if (priv->pstrScanReq) {
+				struct cfg80211_scan_info info = {
+					.aborted = false,
+				};
+
+				cfg80211_scan_done(priv->pstrScanReq, &info);
 				priv->u32RcvdChCount = 0;
 				priv->bCfgScanning = false;
 				priv->pstrScanReq = NULL;
 			}
 			up(&(priv->hSemScanReq));
 
-		}
-		/*Aborting any scan operation during mac close*/
-		else if (enuScanEvent == SCAN_EVENT_ABORTED) {
-			down(&(priv->hSemScanReq));
+			if (priv->pstrScanReq) {
+				struct cfg80211_scan_info info = {
+					.aborted = false,
+				};
 
-			PRINT_D(CFG80211_DBG, "Scan Aborted\n");
-			if (priv->pstrScanReq != NULL) {
-
-				update_scan_time(priv);
+				update_scan_time();
 				refresh_scan(priv, 1, false);
 
-				cfg80211_scan_done(priv->pstrScanReq, false);
+				cfg80211_scan_done(priv->pstrScanReq, &info);
 				priv->bCfgScanning = false;
 				priv->pstrScanReq = NULL;
 			}
