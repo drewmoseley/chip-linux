@@ -362,6 +362,7 @@ static int f_midi_set_alt(struct usb_function *f, unsigned intf, unsigned alt)
 	for (i = 0; i < midi->qlen && err == 0; i++) {
 		struct usb_request *req =
 			midi_alloc_ep_req(midi->out_ep, midi->buflen);
+
 		if (req == NULL)
 			return -ENOMEM;
 
