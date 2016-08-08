@@ -301,6 +301,19 @@ f_midi_complete(struct usb_ep *ep, struct usb_request *req)
 	}
 }
 
+static void f_midi_drop_out_substreams(struct f_midi *midi)
+{
+	unsigned int i;
+
+	for (i = 0; i < midi->in_ports; i++) {
+		struct gmidi_in_port *port = midi->in_ports_array + i;
+		struct snd_rawmidi_substream *substream = port->substream;
+
+		if (port->active && substream)
+			snd_rawmidi_drop_output(substream);
+	}
+}
+
 static int f_midi_start_ep(struct f_midi *midi,
 			   struct usb_function *f,
 			   struct usb_ep *ep)
@@ -397,6 +410,12 @@ static void f_midi_disable(struct usb_function *f)
 	 */
 	usb_ep_disable(midi->in_ep);
 	usb_ep_disable(midi->out_ep);
+
+	/* release IN requests */
+	while (kfifo_get(&midi->in_req_fifo, &req))
+		free_ep_req(midi->in_ep, req);
+
+	f_midi_drop_out_substreams(midi);
 }
 
 static int f_midi_snd_free(struct snd_device *device)
@@ -566,16 +585,12 @@ static void f_midi_transmit_byte(struct usb_request *req,
 	port->state = next_state;
 }
 
-static void f_midi_transmit(struct f_midi *midi, struct usb_request *req)
+static int f_midi_do_transmit(struct f_midi *midi, struct usb_ep *ep)
 {
-	struct usb_ep *ep = midi->in_ep;
-	int i;
-
-	if (!ep)
-		return;
-
-	if (!req)
-		req = midi_alloc_ep_req(ep, midi->buflen);
+	struct usb_request *req = NULL;
+	unsigned int len, i;
+	bool active = false;
+	int err;
 
 	if (!req) {
 		ERROR(midi, "%s: alloc_ep_request failed\n", __func__);
