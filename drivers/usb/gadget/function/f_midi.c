@@ -204,7 +204,7 @@ static struct usb_gadget_strings *midi_strings[] = {
 static inline struct usb_request *midi_alloc_ep_req(struct usb_ep *ep,
 						    unsigned length)
 {
-	return alloc_ep_req(ep, length, length);
+	return alloc_ep_req(ep, length);
 }
 
 static void free_ep_req(struct usb_ep *ep, struct usb_request *req)
