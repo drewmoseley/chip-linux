@@ -39,7 +39,12 @@
 
 #include <kvm/arm_vgic.h>
 
+
+#ifdef CONFIG_ARM_GIC_V3
+#define KVM_MAX_VCPUS VGIC_V3_MAX_CPUS
+#else
 #define KVM_MAX_VCPUS VGIC_V2_MAX_CPUS
+#endif
 
 u32 *kvm_vcpu_reg(struct kvm_vcpu *vcpu, u8 reg_num, u32 mode);
 int __attribute_const__ kvm_target_cpu(void);

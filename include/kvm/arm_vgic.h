@@ -280,7 +280,6 @@ struct vgic_v2_cpu_if {
 };
 
 struct vgic_v3_cpu_if {
-#ifdef CONFIG_KVM_ARM_VGIC_V3
 	u32		vgic_hcr;
 	u32		vgic_vmcr;
 	u32		vgic_sre;	/* Restored only, change ignored */
@@ -290,7 +289,6 @@ struct vgic_v3_cpu_if {
 	u32		vgic_ap0r[4];
 	u32		vgic_ap1r[4];
 	u64		vgic_lr[VGIC_V3_MAX_LRS];
-#endif
 };
 
 struct vgic_cpu {
@@ -351,20 +349,6 @@ bool kvm_vgic_map_is_active(struct kvm_vcpu *vcpu, struct irq_phys_map *map);
 #define vgic_initialized(k)	(!!((k)->arch.vgic.nr_cpus))
 #define vgic_ready(k)		((k)->arch.vgic.ready)
 
-int vgic_v2_probe(struct device_node *vgic_node,
-		  const struct vgic_ops **ops,
-		  const struct vgic_params **params);
-#ifdef CONFIG_KVM_ARM_VGIC_V3
-int vgic_v3_probe(struct device_node *vgic_node,
-		  const struct vgic_ops **ops,
-		  const struct vgic_params **params);
-#else
-static inline int vgic_v3_probe(struct device_node *vgic_node,
-				const struct vgic_ops **ops,
-				const struct vgic_params **params)
-{
-	return -ENODEV;
-}
-#endif
+void vgic_v3_dispatch_sgi(struct kvm_vcpu *vcpu, u64 reg);
 
 #endif
