@@ -503,10 +503,11 @@ static int da8xx_probe(struct platform_device *pdev)
 		goto err3;
 	}
 
-	ret = clk_enable(clk);
-	if (ret) {
-		dev_err(&pdev->dev, "failed to enable clock\n");
-		goto err4;
+	glue->phy = devm_phy_get(&pdev->dev, "usb-phy");
+	if (IS_ERR(glue->phy)) {
+		if (PTR_ERR(glue->phy) != -EPROBE_DEFER)
+			dev_err(&pdev->dev, "failed to get phy\n");
+		return PTR_ERR(glue->phy);
 	}
 
 	glue->dev			= &pdev->dev;
