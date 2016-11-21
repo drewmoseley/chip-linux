@@ -417,6 +417,12 @@ static int da8xx_musb_init(struct musb *musb)
 
 	musb->mregs += DA8XX_MENTOR_CORE_OFFSET;
 
+	ret = clk_prepare_enable(glue->clk);
+	if (ret) {
+		dev_err(glue->dev, "failed to enable clock\n");
+		return ret;
+	}
+
 	/* Returns zero if e.g. not clocked */
 	rev = musb_readl(reg_base, DA8XX_USB_REVISION_REG);
 	if (!rev)
@@ -434,7 +440,17 @@ static int da8xx_musb_init(struct musb *musb)
 	musb_writel(reg_base, DA8XX_USB_CTRL_REG, DA8XX_SOFT_RESET_MASK);
 
 	/* Start the on-chip PHY and its PLL. */
-	phy_on();
+	ret = phy_init(glue->phy);
+	if (ret) {
+		dev_err(glue->dev, "Failed to init phy.\n");
+		goto fail;
+	}
+
+	ret = phy_power_on(glue->phy);
+	if (ret) {
+		dev_err(glue->dev, "Failed to power on phy.\n");
+		goto err_phy_power_on;
+	}
 
 	msleep(5);
 
@@ -445,7 +461,11 @@ static int da8xx_musb_init(struct musb *musb)
 
 	musb->isr = da8xx_musb_interrupt;
 	return 0;
+
+err_phy_power_on:
+	phy_exit(glue->phy);
 fail:
+	clk_disable_unprepare(glue->clk);
 	return ret;
 }
 
