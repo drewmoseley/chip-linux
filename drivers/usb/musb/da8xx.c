@@ -390,7 +390,13 @@ static int da8xx_musb_set_mode(struct musb *musb, u8 musb_mode)
 {
 	u32 cfgchip2 = __raw_readl(CFGCHIP2);
 
-	cfgchip2 &= ~CFGCHIP2_OTGMODE;
+	/*
+	 * The PHY has some issues when it is forced in device or host mode.
+	 * Unless the user request another mode, configure the PHY in OTG mode.
+	 */
+	if (!musb->is_initialized)
+		return phy_set_mode(glue->phy, PHY_MODE_USB_OTG);
+
 	switch (musb_mode) {
 	case MUSB_HOST:		/* Force VBUS valid, ID = 0 */
 		cfgchip2 |= CFGCHIP2_FORCE_HOST;
