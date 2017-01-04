@@ -163,7 +163,7 @@ static int __hyp_text __guest_run(struct kvm_vcpu *vcpu)
 	__activate_vm(vcpu);
 
 	__vgic_restore_state(vcpu);
-	__timer_restore_state(vcpu);
+	__timer_enable_traps(vcpu);
 
 	__sysreg_restore_state(guest_ctxt);
 	__banked_restore_state(guest_ctxt);
@@ -180,7 +180,8 @@ again:
 
 	__banked_save_state(guest_ctxt);
 	__sysreg_save_state(guest_ctxt);
-	__timer_save_state(vcpu);
+	__timer_disable_traps(vcpu);
+
 	__vgic_save_state(vcpu);
 
 	__deactivate_traps(vcpu);
@@ -199,4 +200,42 @@ again:
 	return exit_code;
 }
 
-__alias(__guest_run) int __weak __kvm_vcpu_run(struct kvm_vcpu *vcpu);
+static const char * const __hyp_panic_string[] = {
+	[ARM_EXCEPTION_RESET]      = "\nHYP panic: RST   PC:%08x CPSR:%08x",
+	[ARM_EXCEPTION_UNDEFINED]  = "\nHYP panic: UNDEF PC:%08x CPSR:%08x",
+	[ARM_EXCEPTION_SOFTWARE]   = "\nHYP panic: SVC   PC:%08x CPSR:%08x",
+	[ARM_EXCEPTION_PREF_ABORT] = "\nHYP panic: PABRT PC:%08x CPSR:%08x",
+	[ARM_EXCEPTION_DATA_ABORT] = "\nHYP panic: DABRT PC:%08x ADDR:%08x",
+	[ARM_EXCEPTION_IRQ]        = "\nHYP panic: IRQ   PC:%08x CPSR:%08x",
+	[ARM_EXCEPTION_FIQ]        = "\nHYP panic: FIQ   PC:%08x CPSR:%08x",
+	[ARM_EXCEPTION_HVC]        = "\nHYP panic: HVC   PC:%08x CPSR:%08x",
+};
+
+void __hyp_text __noreturn __hyp_panic(int cause)
+{
+	u32 elr = read_special(ELR_hyp);
+	u32 val;
+
+	if (cause == ARM_EXCEPTION_DATA_ABORT)
+		val = read_sysreg(HDFAR);
+	else
+		val = read_special(SPSR);
+
+	if (read_sysreg(VTTBR)) {
+		struct kvm_vcpu *vcpu;
+		struct kvm_cpu_context *host_ctxt;
+
+		vcpu = (struct kvm_vcpu *)read_sysreg(HTPIDR);
+		host_ctxt = kern_hyp_va(vcpu->arch.host_cpu_context);
+		__timer_disable_traps(vcpu);
+		__deactivate_traps(vcpu);
+		__deactivate_vm(vcpu);
+		__banked_restore_state(host_ctxt);
+		__sysreg_restore_state(host_ctxt);
+	}
+
+	/* Call panic for real */
+	__hyp_do_panic(__hyp_panic_string[cause], elr, val);
+
+	unreachable();
+}
