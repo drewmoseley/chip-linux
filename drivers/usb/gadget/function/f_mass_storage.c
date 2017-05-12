@@ -392,6 +392,20 @@ static int fsg_set_halt(struct fsg_dev *fsg, struct usb_ep *ep)
 
 /* These routines may be called in process context or in_irq */
 
+/* Caller must hold fsg->lock */
+static void wakeup_thread(struct fsg_common *common)
+{
+	/*
+	 * Ensure the reading of thread_wakeup_needed
+	 * and the writing of bh->state are completed
+	 */
+	smp_mb();
+	/* Tell the main thread that something has happened */
+	common->thread_wakeup_needed = 1;
+	if (common->thread_task)
+		wake_up_process(common->thread_task);
+}
+
 static void raise_exception(struct fsg_common *common, enum fsg_state new_state)
 {
 	unsigned long		flags;
@@ -591,20 +605,28 @@ static int sleep_thread(struct fsg_common *common, bool can_freeze,
 {
 	int	rc;
 
-	/* Wait until a signal arrives or bh is no longer busy */
-	if (can_freeze)
-		/*
-		 * synchronize with the smp_store_release(&bh->state) in
-		 * bulk_in_complete() or bulk_out_complete()
-		 */
-		rc = wait_event_freezable(common->io_wait,
-				bh && smp_load_acquire(&bh->state) >=
-					BUF_STATE_EMPTY);
-	else
-		rc = wait_event_interruptible(common->io_wait,
-				bh && smp_load_acquire(&bh->state) >=
-					BUF_STATE_EMPTY);
-	return rc ? -EINTR : 0;
+	/* Wait until a signal arrives or we are woken up */
+	for (;;) {
+		if (can_freeze)
+			try_to_freeze();
+		set_current_state(TASK_INTERRUPTIBLE);
+		if (signal_pending(current)) {
+			rc = -EINTR;
+			break;
+		}
+		if (common->thread_wakeup_needed)
+			break;
+		schedule();
+	}
+	__set_current_state(TASK_RUNNING);
+	common->thread_wakeup_needed = 0;
+
+	/*
+	 * Ensure the writing of thread_wakeup_needed
+	 * and the reading of bh->state are completed
+	 */
+	smp_mb();
+	return rc;
 }
 
 
