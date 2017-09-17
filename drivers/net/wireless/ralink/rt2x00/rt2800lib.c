@@ -846,7 +846,7 @@ static int rt2800_agc_to_rssi(struct rt2x00_dev *rt2x00dev, u32 rxwi_w2)
 	u8 offset1;
 	u8 offset2;
 
-	if (rt2x00dev->curr_band == NL80211_BAND_2GHZ) {
+	if (rt2x00dev->curr_band == IEEE80211_BAND_2GHZ) {
 		eeprom = rt2800_eeprom_read(rt2x00dev, EEPROM_RSSI_BG);
 		offset0 = rt2x00_get_field16(eeprom, EEPROM_RSSI_BG_OFFSET0);
 		offset1 = rt2x00_get_field16(eeprom, EEPROM_RSSI_BG_OFFSET1);
@@ -1898,7 +1898,7 @@ static void rt2800_config_3572bt_ant(struct rt2x00_dev *rt2x00dev)
 	u8 led_ctrl, led_g_mode, led_r_mode;
 
 	reg = rt2800_register_read(rt2x00dev, GPIO_SWITCH);
-	if (rt2x00dev->curr_band == NL80211_BAND_5GHZ) {
+	if (rt2x00dev->curr_band == IEEE80211_BAND_5GHZ) {
 		rt2x00_set_field32(&reg, GPIO_SWITCH_0, 1);
 		rt2x00_set_field32(&reg, GPIO_SWITCH_1, 1);
 	} else {
@@ -3901,7 +3901,7 @@ static int rt2800_get_gain_calibration_delta(struct rt2x00_dev *rt2x00dev)
 	 * Matching Delta value   -4   -3   -2   -1    0   +1   +2   +3   +4
 	 * Example TSSI bounds  0xF0 0xD0 0xB5 0xA0 0x88 0x45 0x25 0x15 0x00
 	 */
-	if (rt2x00dev->curr_band == NL80211_BAND_2GHZ) {
+	if (rt2x00dev->curr_band == IEEE80211_BAND_2GHZ) {
 		eeprom = rt2800_eeprom_read(rt2x00dev, EEPROM_TSSI_BOUND_BG1);
 		tssi_bounds[0] = rt2x00_get_field16(eeprom,
 					EEPROM_TSSI_BOUND_BG1_MINUS4);
