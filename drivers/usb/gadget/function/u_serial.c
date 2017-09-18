@@ -503,7 +503,7 @@ static void gs_rx_push(unsigned long _port)
 		req = list_first_entry(queue, struct usb_request, list);
 
 		/* leave data queued if tty was rx throttled */
-		if (tty tty_throttled(tty))
+		if (tty && tty_throttled(tty))
 			break;
 
 		switch (req->status) {
