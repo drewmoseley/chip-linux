@@ -170,7 +170,7 @@ static void rtw_spt_band_free(struct ieee80211_supported_band *spt_band)
 	if (!spt_band)
 		return;
 
-	if (spt_band->band == NL80211_BAND_2GHZ)
+	if (spt_band->band == IEEE80211_BAND_2GHZ)
 	{
 		size = sizeof(struct ieee80211_supported_band)
 			+ sizeof(struct ieee80211_channel)*RTW_2G_CHANNELS_NUM
