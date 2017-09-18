@@ -72,11 +72,6 @@ function_descriptors(struct usb_function *f,
 	 */
 
 	switch (speed) {
-	case USB_SPEED_SUPER_PLUS:
-		descriptors = f->ssp_descriptors;
-		if (descriptors)
-			break;
-		/* FALLTHROUGH */
 	case USB_SPEED_SUPER:
 		descriptors = f->ss_descriptors;
 		if (descriptors)
