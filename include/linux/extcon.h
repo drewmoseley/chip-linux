@@ -225,33 +225,16 @@ extern int extcon_register_interest(struct extcon_specific_cable_nb *obj,
 extern int extcon_unregister_interest(struct extcon_specific_cable_nb *nb);
 
 /*
- * Following APIs are to monitor the status change of the external connectors.
- * extcon_register_notifier(*edev, id, *nb) : Register a notifier block
- *			for specific external connector of the extcon.
- * extcon_register_notifier_all(*edev, *nb) : Register a notifier block
- *			for all supported external connectors of the extcon.
+ * Following APIs are to monitor every action of a notifier.
+ * Registrar gets notified for every external port of a connection device.
+ * Probably this could be used to debug an action of notifier; however,
+ * we do not recommend to use this for normal 'notifiee' device drivers who
+ * want to be notified by a specific external port of the notifier.
  */
 extern int extcon_register_notifier(struct extcon_dev *edev, unsigned int id,
 				    struct notifier_block *nb);
 extern int extcon_unregister_notifier(struct extcon_dev *edev, unsigned int id,
 				    struct notifier_block *nb);
-extern int devm_extcon_register_notifier(struct device *dev,
-				struct extcon_dev *edev, unsigned int id,
-				struct notifier_block *nb);
-extern void devm_extcon_unregister_notifier(struct device *dev,
-				struct extcon_dev *edev, unsigned int id,
-				struct notifier_block *nb);
-
-extern int extcon_register_notifier_all(struct extcon_dev *edev,
-				struct notifier_block *nb);
-extern int extcon_unregister_notifier_all(struct extcon_dev *edev,
-				struct notifier_block *nb);
-extern int devm_extcon_register_notifier_all(struct device *dev,
-				struct extcon_dev *edev,
-				struct notifier_block *nb);
-extern void devm_extcon_unregister_notifier_all(struct device *dev,
-				struct extcon_dev *edev,
-				struct notifier_block *nb);
 
 /*
  * Following API get the extcon device from devicetree.
@@ -367,17 +350,6 @@ static inline int extcon_unregister_interest(struct extcon_specific_cable_nb
 {
 	return 0;
 }
-
-static inline int devm_extcon_register_notifier(struct device *dev,
-				struct extcon_dev *edev, unsigned int id,
-				struct notifier_block *nb)
-{
-	return -ENOSYS;
-}
-
-static inline  void devm_extcon_unregister_notifier(struct device *dev,
-				struct extcon_dev *edev, unsigned int id,
-				struct notifier_block *nb) { }
 
 static inline struct extcon_dev *extcon_get_edev_by_phandle(struct device *dev,
 							    int index)
