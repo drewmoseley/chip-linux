@@ -250,6 +250,12 @@ static int sunxi_musb_init(struct musb *musb)
 
 	writeb(SUNXI_MUSB_VEND0_PIO_MODE, musb->mregs + SUNXI_MUSB_VEND0);
 
+	/* Register notifier before calling phy_init() */
+	ret = devm_extcon_register_notifier(glue->dev, glue->extcon,
+					EXTCON_USB_HOST, &glue->host_nb);
+	if (ret)
+		goto error_reset_assert;
+
 	ret = phy_init(glue->phy);
 	if (ret)
 		goto error_reset_assert;
