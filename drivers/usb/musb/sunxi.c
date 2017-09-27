@@ -251,14 +251,16 @@ static int sunxi_musb_init(struct musb *musb)
 	writeb(SUNXI_MUSB_VEND0_PIO_MODE, musb->mregs + SUNXI_MUSB_VEND0);
 
 	/* Register notifier before calling phy_init() */
-	ret = devm_extcon_register_notifier(glue->dev, glue->extcon,
-					EXTCON_USB_HOST, &glue->host_nb);
-	if (ret)
-		goto error_reset_assert;
+	if (musb->port_mode == MUSB_PORT_MODE_DUAL_ROLE) {
+		ret = extcon_register_notifier(glue->extcon, EXTCON_USB_HOST,
+					       &glue->host_nb);
+		if (ret)
+			goto error_reset_assert;
+	}
 
 	ret = phy_init(glue->phy);
 	if (ret)
-		goto error_reset_assert;
+		goto error_unregister_notifier;
 
 	musb->isr = sunxi_musb_interrupt;
 
@@ -267,6 +269,10 @@ static int sunxi_musb_init(struct musb *musb)
 
 	return 0;
 
+error_unregister_notifier:
+	if (musb->port_mode == MUSB_PORT_MODE_DUAL_ROLE)
+		extcon_unregister_notifier(glue->extcon, EXTCON_USB_HOST,
+					   &glue->host_nb);
 error_reset_assert:
 	if (test_bit(SUNXI_MUSB_FL_HAS_RESET, &glue->flags))
 		reset_control_assert(glue->rst);
@@ -289,6 +295,10 @@ static int sunxi_musb_exit(struct musb *musb)
 		phy_power_off(glue->phy);
 
 	phy_exit(glue->phy);
+
+	if (musb->port_mode == MUSB_PORT_MODE_DUAL_ROLE)
+		extcon_unregister_notifier(glue->extcon, EXTCON_USB_HOST,
+					   &glue->host_nb);
 
 	if (test_bit(SUNXI_MUSB_FL_HAS_RESET, &glue->flags))
 		reset_control_assert(glue->rst);
