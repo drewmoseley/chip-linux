@@ -23,7 +23,7 @@
 #include <linux/list.h>
 #include <linux/err.h>
 #include <linux/dma-mapping.h>
-#include <linux/sched/task_stack.h>
+#include <linux/sched.h>
 #include <linux/workqueue.h>
 
 #include <linux/usb/ch9.h>
