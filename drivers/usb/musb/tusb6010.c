@@ -1169,8 +1169,7 @@ static int tusb_musb_exit(struct musb *musb)
 }
 
 static const struct musb_platform_ops tusb_ops = {
-	.quirks		= MUSB_DMA_TUSB_OMAP | MUSB_IN_TUSB |
-			  MUSB_G_NO_SKB_RESERVE,
+	.quirks		= MUSB_DMA_TUSB_OMAP | MUSB_IN_TUSB,
 	.init		= tusb_musb_init,
 	.exit		= tusb_musb_exit,
 
