@@ -829,7 +829,7 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
 		return ret;
 
 	/* And we just enabled our clock back */
-	mmc->actual_clock = rate / div;
+	mmc->actual_clock = rate;
 
 	return 0;
 }
