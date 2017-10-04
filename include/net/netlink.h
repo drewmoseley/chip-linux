@@ -106,8 +106,7 @@
  *               padattr)		add s64 attribute to skb
  *   nla_put_string(skb, type, str)	add string attribute to skb
  *   nla_put_flag(skb, type)		add flag attribute to skb
- *   nla_put_msecs(skb, type, jiffies,
- *                 padattr)		add msecs attribute to skb
+ *   nla_put_msecs(skb, type, jiffies)	add msecs attribute to skb
  *   nla_put_in_addr(skb, type, addr)	add IPv4 address attribute to skb
  *   nla_put_in6_addr(skb, type, addr)	add IPv6 address attribute to skb
  *
@@ -966,18 +965,16 @@ static inline int nla_put_flag(struct sk_buff *skb, int attrtype)
 }
 
 /**
- * nla_put_msecs - Add a msecs netlink attribute to a skb and align it
+ * nla_put_msecs - Add a msecs netlink attribute to a socket buffer
  * @skb: socket buffer to add attribute to
  * @attrtype: attribute type
  * @njiffies: number of jiffies to convert to msecs
- * @padattr: attribute type for the padding
  */
 static inline int nla_put_msecs(struct sk_buff *skb, int attrtype,
-				unsigned long njiffies, int padattr)
+				unsigned long njiffies)
 {
 	u64 tmp = jiffies_to_msecs(njiffies);
-
-	return nla_put_64bit(skb, attrtype, sizeof(u64), &tmp, padattr);
+	return nla_put(skb, attrtype, sizeof(u64), &tmp);
 }
 
 /**
