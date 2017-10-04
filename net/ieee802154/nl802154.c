@@ -722,8 +722,7 @@ ieee802154_llsec_send_key_id(struct sk_buff *msg,
 			break;
 		case NL802154_DEV_ADDR_EXTENDED:
 			if (nla_put_le64(msg, NL802154_DEV_ADDR_ATTR_EXTENDED,
-					 desc->device_addr.extended_addr,
-					 NL802154_DEV_ADDR_ATTR_PAD))
+					 desc->device_addr.extended_addr))
 				return -ENOBUFS;
 			break;
 		default:
@@ -743,8 +742,7 @@ ieee802154_llsec_send_key_id(struct sk_buff *msg,
 		break;
 	case NL802154_KEY_ID_MODE_INDEX_EXTENDED:
 		if (nla_put_le64(msg, NL802154_KEY_ID_ATTR_SOURCE_EXTENDED,
-				 desc->extended_source,
-				 NL802154_KEY_ID_ATTR_PAD))
+				 desc->extended_source))
 			return -ENOBUFS;
 		break;
 	default:
@@ -821,8 +819,7 @@ nl802154_send_iface(struct sk_buff *msg, u32 portid, u32 seq, int flags,
 
 	/* address settings */
 	if (nla_put_le64(msg, NL802154_ATTR_EXTENDED_ADDR,
-			 wpan_dev->extended_addr,
-			 NL802154_ATTR_PAD) ||
+			 wpan_dev->extended_addr) ||
 	    nla_put_le16(msg, NL802154_ATTR_SHORT_ADDR,
 			 wpan_dev->short_addr) ||
 	    nla_put_le16(msg, NL802154_ATTR_PAN_ID, wpan_dev->pan_id))
@@ -1617,7 +1614,7 @@ static int nl802154_send_device(struct sk_buff *msg, u32 cmd, u32 portid,
 	    nla_put_le16(msg, NL802154_DEV_ATTR_SHORT_ADDR,
 			 dev_desc->short_addr) ||
 	    nla_put_le64(msg, NL802154_DEV_ATTR_EXTENDED_ADDR,
-			 dev_desc->hwaddr, NL802154_DEV_ATTR_PAD) ||
+			 dev_desc->hwaddr) ||
 	    nla_put_u8(msg, NL802154_DEV_ATTR_SECLEVEL_EXEMPT,
 		       dev_desc->seclevel_exempt) ||
 	    nla_put_u32(msg, NL802154_DEV_ATTR_KEY_MODE, dev_desc->key_mode))
@@ -1781,7 +1778,7 @@ static int nl802154_send_devkey(struct sk_buff *msg, u32 cmd, u32 portid,
 		goto nla_put_failure;
 
 	if (nla_put_le64(msg, NL802154_DEVKEY_ATTR_EXTENDED_ADDR,
-			 extended_addr, NL802154_DEVKEY_ATTR_PAD) ||
+			 extended_addr) ||
 	    nla_put_u32(msg, NL802154_DEVKEY_ATTR_FRAME_COUNTER,
 			devkey->frame_counter))
 		goto nla_put_failure;
