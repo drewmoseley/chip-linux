@@ -693,7 +693,7 @@ mwifiex_close(struct net_device *dev)
 		};
 		mwifiex_dbg(priv->adapter, INFO,
 			    "aborting scan on ndo_stop\n");
-		cfg80211_scan_done(priv->scan_request, $info);
+		cfg80211_scan_done(priv->scan_request, &info);
 		priv->scan_request = NULL;
 		priv->scan_aborting = true;
 	}
