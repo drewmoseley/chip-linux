@@ -1052,11 +1052,8 @@ static noinline_for_stack int rtnl_fill_stats(struct sk_buff *skb,
 	const struct rtnl_link_stats64 *stats;
 	struct rtnl_link_stats64 temp;
 	struct nlattr *attr;
-	int err;
 
-	err = nla_align_64bit(skb, IFLA_PAD);
-	if (err)
-		return err;
+	stats = dev_get_stats(dev, &temp);
 
 	attr = nla_reserve(skb, IFLA_STATS,
 			   sizeof(struct rtnl_link_stats));
