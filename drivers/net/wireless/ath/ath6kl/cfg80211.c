@@ -993,9 +993,6 @@ static int ath6kl_cfg80211_scan(struct wiphy *wiphy,
 {
 	struct ath6kl_vif *vif = ath6kl_vif_from_wdev(request->wdev);
 	struct ath6kl *ar = ath6kl_priv(vif->ndev);
-	struct cfg80211_scan_info info = {
-		.aborted = aborted,
-	};
 	s8 n_channels = 0;
 	u16 *channels = NULL;
 	int ret = 0;
