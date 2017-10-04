@@ -76,10 +76,8 @@ static int nft_counter_dump(struct sk_buff *skb, const struct nft_expr *expr)
 
 	nft_counter_fetch(priv->counter, &total);
 
-	if (nla_put_be64(skb, NFTA_COUNTER_BYTES, cpu_to_be64(total.bytes),
-			 NFTA_COUNTER_PAD) ||
-	    nla_put_be64(skb, NFTA_COUNTER_PACKETS, cpu_to_be64(total.packets),
-			 NFTA_COUNTER_PAD))
+	if (nla_put_be64(skb, NFTA_COUNTER_BYTES, cpu_to_be64(total.bytes)) ||
+	    nla_put_be64(skb, NFTA_COUNTER_PACKETS, cpu_to_be64(total.packets)))
 		goto nla_put_failure;
 	return 0;
 

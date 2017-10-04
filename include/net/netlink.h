@@ -856,23 +856,29 @@ static inline int nla_put_u64(struct sk_buff *skb, int attrtype, u64 value)
 }
 
 /**
- * nla_put_be64 - Add a __be64 netlink attribute to a socket buffer and align it
+ * nla_put_u64_64bit - Add a u64 netlink attribute to a skb and align it
  * @skb: socket buffer to add attribute to
  * @attrtype: attribute type
  * @value: numeric value
  * @padattr: attribute type for the padding
  */
-static inline int nla_put_be64(struct sk_buff *skb, int attrtype, __be64 value,
-			       int padattr)
+static inline int nla_put_u64_64bit(struct sk_buff *skb, int attrtype,
+				    u64 value, int padattr)
 {
-	return nla_put_64bit(skb, attrtype, sizeof(__be64), &value, padattr);
+	return nla_put_64bit(skb, attrtype, sizeof(u64), &value, padattr);
 }
 
-static inline int nla_put_be64_32bit(struct sk_buff *skb, int attrtype,
-				     __be64 value)
+/**
+ * nla_put_be64 - Add a __be64 netlink attribute to a socket buffer and align it
+ * @skb: socket buffer to add attribute to
+ * @attrtype: attribute type
+ * @value: numeric value
+ */
+static inline int nla_put_be64(struct sk_buff *skb, int attrtype, __be64 value)
 {
 	return nla_put(skb, attrtype, sizeof(__be64), &value);
 }
+
 /**
  * nla_put_net64 - Add 64-bit network byte order netlink attribute to a socket buffer
  * @skb: socket buffer to add attribute to
@@ -881,7 +887,7 @@ static inline int nla_put_be64_32bit(struct sk_buff *skb, int attrtype,
  */
 static inline int nla_put_net64(struct sk_buff *skb, int attrtype, __be64 value)
 {
-	return nla_put_be64_32bit(skb, attrtype | NLA_F_NET_BYTEORDER, value);
+	return nla_put_be64(skb, attrtype | NLA_F_NET_BYTEORDER, value);
 }
 
 /**
