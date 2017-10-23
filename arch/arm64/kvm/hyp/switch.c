@@ -21,6 +21,7 @@
 #include <asm/kvm_asm.h>
 #include <asm/kvm_emulate.h>
 #include <asm/kvm_hyp.h>
+#include <asm/kvm_mmu.h>
 #include <asm/fpsimd.h>
 
 static bool __hyp_text __fpsimd_enabled_nvhe(void)
