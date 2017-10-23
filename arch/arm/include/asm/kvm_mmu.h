@@ -44,6 +44,8 @@
 
 #include <linux/highmem.h>
 #include <asm/cacheflush.h>
+#include <asm/cputype.h>
+#include <asm/kvm_hyp.h>
 #include <asm/pgalloc.h>
 
 int create_hyp_mappings(void *from, void *to);
@@ -184,6 +186,8 @@ static inline void __coherent_cache_guest_page(struct kvm_vcpu *vcpu, pfn_t pfn,
 					       unsigned long size,
 					       bool ipa_uncached)
 {
+	u32 iclsz;
+
 	/*
 	 * If we are going to insert an instruction page and the icache is
 	 * either VIPT or PIPT, there is a potential problem where the host
@@ -209,15 +213,27 @@ static inline void __coherent_cache_guest_page(struct kvm_vcpu *vcpu, pfn_t pfn,
 	if (!need_flush && !icache_is_pipt())
 		goto vipt_cache;
 
+	/*
+	 * CTR IminLine contains Log2 of the number of words in the
+	 * cache line, so we can get the number of words as
+	 * 2 << (IminLine - 1).  To get the number of bytes, we
+	 * multiply by 4 (the number of bytes in a 32-bit word), and
+	 * get 4 << (IminLine).
+	 */
+	iclsz = 4 << (read_cpuid(CPUID_CACHETYPE) & 0xf);
+
 	while (size) {
 		void *va = kmap_atomic_pfn(pfn);
+		void *end = va + PAGE_SIZE;
+		void *addr = va;
 
-		if (need_flush)
-			kvm_flush_dcache_to_poc(va, PAGE_SIZE);
+		do {
+			write_sysreg(addr, ICIMVAU);
+			addr += iclsz;
+		} while (addr < end);
 
-		if (icache_is_pipt())
-			__cpuc_coherent_user_range((unsigned long)va,
-						   (unsigned long)va + PAGE_SIZE);
+		dsb(ishst);
+		isb();
 
 		size -= PAGE_SIZE;
 		pfn++;
@@ -225,10 +241,11 @@ static inline void __coherent_cache_guest_page(struct kvm_vcpu *vcpu, pfn_t pfn,
 		kunmap_atomic(va);
 	}
 
-vipt_cache:
-	if (!icache_is_pipt() && !icache_is_vivt_asid_tagged()) {
-		/* any kind of VIPT cache */
-		__flush_icache_all();
+	/* Check if we need to invalidate the BTB */
+	if ((read_cpuid_ext(CPUID_EXT_MMFR1) >> 28) != 4) {
+		write_sysreg(0, BPIALLIS);
+		dsb(ishst);
+		isb();
 	}
 }
 
