@@ -49,6 +49,9 @@
 
 #ifdef CONFIG_CPU_CP15
 
+#define BPIALL                         __ACCESS_CP15(c7, 0, c5, 6)
+#define ICIALLU                                __ACCESS_CP15(c7, 0, c5, 0)
+
 extern unsigned long cr_alignment;	/* defined in entry-armv.S */
 
 static inline unsigned long get_cr(void)
