@@ -688,13 +688,13 @@ __v7_ca15mp_proc_info:
 	.size	__v7_ca15mp_proc_info, . - __v7_ca15mp_proc_info
 
 	/*
-	 * Broadcom Corporation Brahma-B15 processor.
+	 * Broadcom Corporation Brahma-B15 processor.- BROKEN!
 	 */
 	.type	__v7_b15mp_proc_info, #object
 __v7_b15mp_proc_info:
 	.long	0x420f00f0
 	.long	0xff0ffff0
-	__v7_proc __v7_b15mp_proc_info, __v7_b15mp_setup, proc_fns = ca15_processor_functions, cache_fns = b15_cache_fns
+	__v7_proc __v7_b15mp_proc_info, __v7_b15mp_setup
 	.size	__v7_b15mp_proc_info, . - __v7_b15mp_proc_info
 
 	/*
