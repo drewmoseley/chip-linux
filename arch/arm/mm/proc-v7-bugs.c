@@ -50,8 +50,6 @@ static void cpu_v7_spectre_init(void)
 	case ARM_CPU_PART_CORTEX_A9:
 	case ARM_CPU_PART_CORTEX_A12:
 	case ARM_CPU_PART_CORTEX_A17:
-	case ARM_CPU_PART_CORTEX_A73:
-	case ARM_CPU_PART_CORTEX_A75:
 		if (processor.switch_mm != cpu_v7_bpiall_switch_mm)
 			goto bl_error;
 		per_cpu(harden_branch_predictor_fn, cpu) =
@@ -60,7 +58,6 @@ static void cpu_v7_spectre_init(void)
 		break;
 
 	case ARM_CPU_PART_CORTEX_A15:
-	case ARM_CPU_PART_BRAHMA_B15:
 		if (processor.switch_mm != cpu_v7_iciallu_switch_mm)
 			goto bl_error;
 		per_cpu(harden_branch_predictor_fn, cpu) =
@@ -68,52 +65,6 @@ static void cpu_v7_spectre_init(void)
 		spectre_v2_method = "ICIALLU";
 		break;
 
-#ifdef CONFIG_ARM_PSCI
-	default:
-		/* Other ARM CPUs require no workaround */
-		if (read_cpuid_implementor() == ARM_CPU_IMP_ARM)
-			break;
-		/* fallthrough */
-		/* Cortex A57/A72 require firmware workaround */
-	case ARM_CPU_PART_CORTEX_A57:
-	case ARM_CPU_PART_CORTEX_A72: {
-		struct arm_smccc_res res;
-
-		if (psci_ops.smccc_version == SMCCC_VERSION_1_0)
-			break;
-
-		switch (psci_ops.conduit) {
-		case PSCI_CONDUIT_HVC:
-			arm_smccc_1_1_hvc(ARM_SMCCC_ARCH_FEATURES_FUNC_ID,
-					  ARM_SMCCC_ARCH_WORKAROUND_1, &res);
-			if ((int)res.a0 != 0)
-				break;
-			if (processor.switch_mm != cpu_v7_hvc_switch_mm && cpu)
-				goto bl_error;
-			per_cpu(harden_branch_predictor_fn, cpu) =
-				call_hvc_arch_workaround_1;
-			processor.switch_mm = cpu_v7_hvc_switch_mm;
-			spectre_v2_method = "hypervisor";
-			break;
-
-		case PSCI_CONDUIT_SMC:
-			arm_smccc_1_1_smc(ARM_SMCCC_ARCH_FEATURES_FUNC_ID,
-					  ARM_SMCCC_ARCH_WORKAROUND_1, &res);
-			if ((int)res.a0 != 0)
-				break;
-			if (processor.switch_mm != cpu_v7_smc_switch_mm && cpu)
-				goto bl_error;
-			per_cpu(harden_branch_predictor_fn, cpu) =
-				call_smc_arch_workaround_1;
-			processor.switch_mm = cpu_v7_smc_switch_mm;
-			spectre_v2_method = "firmware";
-			break;
-
-		default:
-			break;
-		}
-	}
-#endif
 	}
 
 	if (spectre_v2_method)
